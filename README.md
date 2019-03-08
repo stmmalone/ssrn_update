@@ -1,2 +1,4 @@
 # ssrn_update
-Presents information and links to most recently posted papers on SSRN
+* Uses BeautifulSoup to scrape titles, authors, download counts, and link to SSRN abstracts in a given eJournal.
+* Summarizes recent papers, sorted by download count, in an HTML table.
+* Emails table using smtplib
