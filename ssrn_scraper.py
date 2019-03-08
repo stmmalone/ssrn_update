@@ -1,8 +1,3 @@
-
-# coding: utf-8
-
-# In[161]:
-
 import numpy as np
 import pandas as pd
 import requests
@@ -12,16 +7,10 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from datetime import datetime
 
-
-# In[127]:
-
 def blank_data_frame():
     labels = ['Title', 'Link', 'Date', 'Author(s)', 'Downloads']
     papers = pd.DataFrame(columns=labels)
     return papers
-
-
-# In[257]:
 
 def get_last_page(journal_id):
     url = "https://papers.ssrn.com/sol3/Jeljour_results.cfm?npage={0}&form_name=journalBrowse&journal_id={1}".format(page_number, journal_id)
@@ -31,9 +20,6 @@ def get_last_page(journal_id):
     last_page = int(last_page)
     return last_page
 
-
-# In[258]:
-
 def get_results_html(page_number, journal_id):
     url = "https://papers.ssrn.com/sol3/Jeljour_results.cfm?npage={0}&form_name=journalBrowse&journal_id={1}".format(page_number, journal_id)
     page = requests.get(url, timeout=10)
@@ -42,31 +28,19 @@ def get_results_html(page_number, journal_id):
     html = table.select("div[class^=trow]")
     return html
 
-
-# In[180]:
-
 def get_paper_html(results_html, result_number):
     html = results_html[result_number]
     return html
-
-
-# In[238]:
 
 def get_title(paper_html):
     title_html = paper_html.find(class_="title optClickTitle")
     title = title_html.get_text()
     return title
 
-
-# In[228]:
-
 def get_link(paper_html):
     title_html = paper_html.find(class_="title optClickTitle")
     link = title_html.get('href')
     return link
-
-
-# In[168]:
 
 def get_post_date(paper_html):
     date_html = paper_html.find(class_="note note-list")
@@ -79,16 +53,10 @@ def get_post_date(paper_html):
     date = datetime.strptime(date_str, '%d %b %Y')
     return date
 
-
-# In[170]:
-
 def get_authors(paper_html):
     authors_html = paper_html.find(class_='authors-list')
     authors = authors_html.get_text().replace('\n','')
     return authors
-
-
-# In[298]:
 
 def get_downloads(paper_html):
     downloads_html = paper_html.find(class_='downloads')
@@ -98,9 +66,6 @@ def get_downloads(paper_html):
     except ValueError:
         downloads = 0
     return downloads
-
-
-# In[220]:
 
 def get_paper_info(results_html, result_number):
     paper_html = get_paper_html(papers_html, result_number)
@@ -116,9 +81,6 @@ def get_paper_info(results_html, result_number):
         paper = pd.DataFrame(paper_data, columns=labels)
     return paper    
 
-
-# In[308]:
-
 def summary_to_html(papers):
     date_cutoff = datetime.today() + pd.DateOffset(days=-7, normalize=True)
     papers = papers[papers['Date'] > date_cutoff]
@@ -128,24 +90,18 @@ def summary_to_html(papers):
         html = papers.to_html(index=False)
     return html
 
-
-# In[303]:
-
 def send_email(sender, recipient, html_content, user_name, password):
     # Create message container - the correct MIME type is multipart/alternative.
     msg = MIMEMultipart('alternative')
     msg['Subject'] = "SSRN Papers"
     msg['From'] = sender
     msg['To'] = recipient
-
     # Create the body of the message (a plain-text and an HTML version).
     text = "This is an HTML email. Allow HTML content to view."
     html = html_content
-
     # Record the MIME types of both parts - text/plain and text/html.
     part1 = MIMEText(text, 'plain')
     part2 = MIMEText(html, 'html')
-
     # Attach parts into message container.
     # According to RFC 2046, the last part of a multipart message, in this case
     # the HTML message, is best and preferred.
@@ -153,18 +109,12 @@ def send_email(sender, recipient, html_content, user_name, password):
     msg.attach(part2)
     # Send the message via local SMTP server.
     mail = smtplib.SMTP('smtp.gmail.com', 587)
-
     mail.ehlo()
-
     mail.starttls()
-
     mail.login(user_name, password)
     mail.sendmail(me, you, msg.as_string())
     mail.quit()
     return
-
-
-# In[307]:
 
 if __name__ == '__main__':
     journal_id = 1175282
@@ -181,4 +131,3 @@ if __name__ == '__main__':
             papers = papers.append(paper)
     html_table = summary_to_html(papers)
     send_email(sender, recipient, html_table, user_name, password)
-
